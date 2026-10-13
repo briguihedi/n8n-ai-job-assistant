@@ -181,9 +181,9 @@ Sample templates are in [`sample-data/templates.csv`](sample-data/templates.csv)
 
 | Workflow 1 | Workflow 2 |
 |---|---|
-| ![Workflow 1](screenshots/workflow-1.png) | ![Workflow 2](screenshots/workflow-2.png) |
+| ![Workflow 1](screenshots/Job_assigned.png) | ![Workflow 2](screenshots/Customer_reply.png) |
 
-![Google Sheets: Jobs, Templates, Logs](screenshots/sheets.png)
+![Google Sheets: Jobs, Templates, Logs](screenshots/Jobs.png)
 
 ## Setup guide
 

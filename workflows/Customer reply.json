@@ -1,0 +1,646 @@
+{
+  "name": "Customer reply",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const template = $json.template_text;\nconst detail = $('Parse AI Result').item.json.detail || 'that time';\nconst nice = detail.charAt(0).toUpperCase() + detail.slice(1);\nreturn { json: { final_text: template.replace(/\\{+\\s*detail\\s*\\}+/gi, nice) } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "fc33ad78-79d8-4532-b88e-f1bee9e2f2d4",
+      "name": "Fill template"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "25dcab48-550d-414b-ae0c-0b047e4dabb7",
+      "name": "Customer reply received",
+      "webhookId": "1639e68f-396d-47f5-b777-c5bd5a958605",
+      "credentials": {
+        "telegramApi": {
+          "id": "fLsZODJ32csTsDR7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU",
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "telegram_chat_id",
+              "lookupValue": "={{ $json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "54008a68-5af6-4ad5-9399-0046ca90b37d",
+      "name": "Find job",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lmBCJgEFwscnAyfC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Classify the customer's message into one of these intents:\nconfirm, reschedule_with_time, reschedule_no_time, question, cancel, other.\n\nUse reschedule_with_time if the customer asks to change the appointment AND mentions a day or time. Use reschedule_no_time if they want to change it but give no day or time.\n\nAlso extract \"detail\": the day or time they mentioned, or an empty string if none.\n\nCustomer message: {{ $('Customer reply received').item.json.message.text }}\n\nReply with JSON only, no extra text, no code fences:\n{\"intent\": \"...\", \"detail\": \"...\"}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        448,
+        0
+      ],
+      "id": "42713bbb-d024-4b45-9e55-067f3186787f",
+      "name": "Classify intent",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        208
+      ],
+      "id": "ff12886a-6bc1-4221-b090-e98566a3d494",
+      "name": "Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HtumXUZKr89I2QhA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const raw = $json.text.replace(/```json|```/g, '').trim();\nconst data = JSON.parse(raw);\nreturn { json: { intent: data.intent.toLowerCase().trim(), detail: data.detail || '' } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        144
+      ],
+      "id": "601af260-61b8-4b7a-bdba-261e864962de",
+      "name": "Parse AI Result"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU",
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 527369864,
+          "mode": "list",
+          "cachedResultName": "Templates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit#gid=527369864"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "intent",
+              "lookupValue": "={{ $json.intent }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        816,
+        0
+      ],
+      "id": "6087f871-37f5-42f2-9bf3-3c0ac45e6772",
+      "name": "Find template",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lmBCJgEFwscnAyfC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "7745422728",
+        "message": "=Customer said: {{ $('Customer reply received').item.json.message.text }}\n\nSuggested reply: {{ $('Fill template').item.json.final_text }}\n\nReply \"ok\" to send it as is, or type your own text to send instead.",
+        "responseType": "freeText",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1264,
+        0
+      ],
+      "id": "9e614e4d-531b-44c1-9d29-4784ee840400",
+      "name": "Rep Approval",
+      "webhookId": "012b3461-14bc-4c80-ab97-5526b054a6dd",
+      "credentials": {
+        "telegramApi": {
+          "id": "fLsZODJ32csTsDR7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c8027ac3-a8f2-4621-85bd-f4d3a3a8f682",
+              "leftValue": "={{ $('Rep Approval').item.json.data.text.trim().toLowerCase() }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1488,
+        0
+      ],
+      "id": "97cd8ef8-0475-4b23-b244-fe22e3e76436",
+      "name": "Approved or Edited"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Customer reply received').item.json.message.chat.id }}",
+        "text": "={{ $('Fill template').item.json.final_text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1712,
+        -96
+      ],
+      "id": "12880fce-9fba-4a74-87df-1c5b4c25789c",
+      "name": "Send approved reply",
+      "webhookId": "f2f94d15-66f8-4da6-a5b2-d64b1845b9c0",
+      "credentials": {
+        "telegramApi": {
+          "id": "fLsZODJ32csTsDR7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Customer reply received').item.json.message.chat.id }}",
+        "text": "={{ $('Rep Approval').item.json.data.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1712,
+        96
+      ],
+      "id": "1a4e649f-9e43-4179-81f2-72196c3f98e1",
+      "name": "Send edited reply",
+      "webhookId": "cfb51533-ed82-4980-8b76-cf220bacd633",
+      "credentials": {
+        "telegramApi": {
+          "id": "fLsZODJ32csTsDR7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU",
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1303666276,
+          "mode": "list",
+          "cachedResultName": "Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit#gid=1303666276"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now }}",
+            "customer_name": "={{ $('Find job').item.json.customer_name }}",
+            "customer_message": "={{ $('Customer reply received').item.json.message.text }}",
+            "intent": "={{ $('Parse AI Result').item.json.intent }}",
+            "detail": "={{ $('Parse AI Result').item.json.detail }}",
+            "suggested_reply": "={{ $('Fill template').item.json.final_text }}",
+            "approve": "yes"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_message",
+              "displayName": "customer_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "detail",
+              "displayName": "detail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "suggested_reply",
+              "displayName": "suggested_reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approve",
+              "displayName": "approve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1936,
+        -96
+      ],
+      "id": "3e0c0357-8072-495f-b7b5-8db141149fa6",
+      "name": "Log approved",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lmBCJgEFwscnAyfC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU",
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1303666276,
+          "mode": "list",
+          "cachedResultName": "Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit#gid=1303666276"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now }}",
+            "customer_name": "={{ $('Find job').item.json.customer_name }}",
+            "customer_message": "={{ $('Customer reply received').item.json.message.text }}",
+            "intent": "={{ $('Parse AI Result').item.json.intent }}",
+            "detail": "={{ $('Parse AI Result').item.json.detail }}",
+            "suggested_reply": "={{ $('Rep Approval').item.json.data.text }}",
+            "approve": "edited"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_message",
+              "displayName": "customer_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "detail",
+              "displayName": "detail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "suggested_reply",
+              "displayName": "suggested_reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approve",
+              "displayName": "approve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1936,
+        96
+      ],
+      "id": "5fcc2d46-925e-4b99-b93c-ac7bea91c594",
+      "name": "log edited",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lmBCJgEFwscnAyfC",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Fill template": {
+      "main": [
+        [
+          {
+            "node": "Rep Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer reply received": {
+      "main": [
+        [
+          {
+            "node": "Find job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find job": {
+      "main": [
+        [
+          {
+            "node": "Classify intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify intent": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classify intent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Result": {
+      "main": [
+        [
+          {
+            "node": "Find template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find template": {
+      "main": [
+        [
+          {
+            "node": "Fill template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rep Approval": {
+      "main": [
+        [
+          {
+            "node": "Approved or Edited",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved or Edited": {
+      "main": [
+        [
+          {
+            "node": "Send approved reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send edited reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send approved reply": {
+      "main": [
+        [
+          {
+            "node": "Log approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send edited reply": {
+      "main": [
+        [
+          {
+            "node": "log edited",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "73983892-d152-43c2-96fa-2cc6c5d620a1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "78fcfb34b2e63b1aabe9595d744adbf47cfd7effc8b225c46f6a8c102129cfc6"
+  },
+  "nodeGroups": [],
+  "id": "QBBsEcLJQc701P6F",
+  "tags": []
+}

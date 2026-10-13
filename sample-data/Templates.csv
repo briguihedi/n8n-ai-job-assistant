@@ -1,0 +1,12 @@
+job_id,customer_name,telegram_chat_id,,job_type,scheduled_time,address,assigned_to,message_sent
+1001,Ben’s Plumbing Ltd,7745422728,,Water heater repair,2026-10-14 10:00,"25 Main Street, Austin",Brigui,yes
+1002,SBS,7745422728,,GAZ,2026-10-16,Av Monji Slim,Brigui,yes
+1003,sangYoung ,7745422728,,Transport de Voitures,2026-11-16,"Rue de Ceinture Sahloul,Sousse",Brigui,yes
+1004,SBS,7745422728,,GAZ,2026-12-10,"Zeramdine,Monastir",Firas,
+1005,SBSS,7745422728,,preparation  de l'endroit ,2026-12-25,"Zeramdine ,Monastir",Brigui,yes
+1006,SBSS,7745422728,,GAZ et Eau,2026-10-30,Sousse,Brigui,yes
+1007,Aziz Company,7745422728,,faciliter les commandes,2026-11-23,Sousse,Brigui,yes
+1008,Bahria,7745422728,,Transport de machines,2026-10-25,Port Sousse,Brigui,yes
+1009,Bagria,7745422728,,Transport des roues ,2026-10-23,Port halq el oued tunis,Brigui,yes
+1010,Bahria,7745422728,,Transport des machines medicales,2026-10-20,Port Bizete,Brigui,yes
+1011,Bahria,7745422728,,Transport de Velos,2026-10-19,Poet Bizerte,Brigui,

@@ -1,0 +1,359 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU",
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "45278f1b-699a-4c2c-a2f5-5f5712ce5d84",
+      "name": "Job Row Updated",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "WYgMMyCkXNqxDt7Z",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a3a6db51-4f59-42cb-84f7-9bea56687b22",
+              "leftValue": "={{ $json.assigned_to }}",
+              "rightValue": "Brigui",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "c4e1ffd9-f5fd-4cf9-ac6e-88734e372ce6",
+              "leftValue": "={{ $json.message_sent }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "2e471475-71b3-4a54-8df3-9e412227d3ca",
+      "name": "Assigned to me and not sent?"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a short, friendly, professional SMS (under 300 characters) to {{ $json.customer_name }}. Tell them that Hamza has been assigned to their {{ $json.job_type }} job at {{ $json.address }}. Ask them to reply to confirm. Output only the message, nothing else.",
+        "messages": {
+          "messageValues": []
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        448,
+        -96
+      ],
+      "id": "a4560c8a-95f2-410b-90e6-4cfabf59aa06",
+      "name": "Write first message",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU",
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQts0tWU9aH4RtEAmWQDlBhHqQJ9am3o-YypUfiq7UU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "job_id": "={{ $('Job Row Updated').item.json.job_id }}",
+            "message_sent": "yes"
+          },
+          "matchingColumns": [
+            "job_id"
+          ],
+          "schema": [
+            {
+              "id": "job_id",
+              "displayName": "job_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "telegram_chat_id",
+              "displayName": "telegram_chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "job_type",
+              "displayName": "job_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scheduled_time",
+              "displayName": "scheduled_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "address",
+              "displayName": "address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "message_sent",
+              "displayName": "message_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        -96
+      ],
+      "id": "8bd63a01-0fba-47e9-840d-bc609446ed16",
+      "name": "Mark as sent",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lmBCJgEFwscnAyfC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        112
+      ],
+      "id": "e11e5969-1ac3-4799-a71f-6b1209484bf3",
+      "name": " Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HtumXUZKr89I2QhA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Job Row Updated').item.json.telegram_chat_id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        816,
+        -96
+      ],
+      "id": "172b330c-fa74-41cd-a5e7-b64105b77f7c",
+      "name": "Send first message",
+      "webhookId": "8d842613-0990-4339-9af2-d4368b0f640f",
+      "credentials": {
+        "telegramApi": {
+          "id": "fLsZODJ32csTsDR7",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Job Row Updated": {
+      "main": [
+        [
+          {
+            "node": "Assigned to me and not sent?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assigned to me and not sent?": {
+      "main": [
+        [
+          {
+            "node": "Write first message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write first message": {
+      "main": [
+        [
+          {
+            "node": "Send first message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    " Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Write first message",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send first message": {
+      "main": [
+        [
+          {
+            "node": "Mark as sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c229d4da-841b-48a9-87d8-5b67a145ea44",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "78fcfb34b2e63b1aabe9595d744adbf47cfd7effc8b225c46f6a8c102129cfc6"
+  },
+  "nodeGroups": [],
+  "id": "swBOSbxvejKD98oB",
+  "tags": []
+}
